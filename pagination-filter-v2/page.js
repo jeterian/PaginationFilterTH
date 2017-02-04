@@ -1,49 +1,77 @@
-/*
-  Project 2 - Pagination/Content filter
+/* Unit 2 - Pagination and Content Filter Project
   Tamar E. Chalker
+  Problem: Instead of displaying all student records, display ten at a time
+  Solution: add pagination links that correspond with every 10 students
+
+  Exceeds Expectations:
+  Problem: No way to search for specific students
+  Solution: create search that will return only students that match the input
 */
 
-// Pagination - split list of students into pages
+// initial variables
+var totalStudents = $('.student-item').length;
+var allStudents = [];
 
-// Selecting DOM elements for use in pagination
-var studentRecord = document.getElementsByClassName('student-item cf');
-var ulPagination = document.createElement('ul');
-var divPagination = document.createElement('div');
-var page = document.querySelector('.page');
-ulPagination.className = 'pagi-list';
-divPagination.className = 'pagination';
-page.appendChild(divPagination);
+// use function to save student records in list
+$(".student-item").children(".student-details").each(function () {
+  allStudents.push(this);
+});
 
-// index of student records
-var listOfStudents = document.getElementsByClassName('student-item');
-var studentIndexDisplay = [];
+// message if no Results, start by hiding it
+var noResults = $("<p class='no-result'>Search returned no results.</p>").insertAfter($(".student-list"));
+noResults.hide();
 
-//loop through student list
-for (var i = 0; i < listOfStudents.length; i++){
-  studentIndexDisplay.push(i);
+// hide all students except first ten on startup
+$(".student-item").hide().slice(0,10).show();
+
+//PAGINATION
+var pagContainer = $("<div class='pagination'><ul></ul></div>");
+$(".page").append(pagContainer);
+
+// loop to determine how many links to make
+for(var i = 1; i<=Math.ceil(totalStudents/10); i++) {
+  $(".pagination ul").append($('<li><a href="#">' + i + '</a></li>'));
 }
 
-// create pagination links
-var createLinks = function(numStuDisplay, activePage) {
-  var links = Math.ceil(numStuDisplay / 10);
-  if (links !==1){
-    for (var i = 0; i < links; i++) {
+// set active class for first page initially and for others on clicking the link
+$(".pagination ul li a:first").addClass('active');
+$(".pagination ul a").on('click', function () {
+  $("li a").removeClass('active');
+  $(this).addClass('active');
+})
 
-      //get list item
-      var liElement = document.createElement('li');
+// display students according to page links clicked
+$(".pagination li").on('click', function () {
+  $(".student-item").hide().slice($(this).index() * 10, $(this).index() * 10 + 10).show();
+  noResults.hide();
+})
 
-      //get links
-      var linkElement = document.createElement('a');
-      linkElement.setAttribute('href', '#');
-      linkElement.textContent = i++;
-
-      //click listener to links
-      linkElement.addEventListener('click', displayMax);
-      if (i === activePage - 1) {
-        linkElement.className = 'active';
-      }
-      liElement.appendChild(linkElement);
-      ulPagination.appendChild(li);
+// SEARCH
+var searchInput = $("<div class = 'student-search'><input value='' placeholder='Search records'><button>Search</button></div>");
+$('.page-header').append(searchInput);
+$('.student-search button').on('click', function () {
+  noResults.hide();
+  var studentSearch = [];
+  var inputSearch = $('.student-search input').val();
+  for(var i = 0; i < totalStudents.length; i++) {
+    var name = allStudents[i].innerText;
+    if(name.indexOf(inputSearch) !== -1) {
+      $(".student-list li").css('display', 'none');
+      studentSearch.push(allStudents[i]);
+      $(".student-search input").val('');
     }
   }
-}
+
+  $(studentSearch).parent().show();
+
+  if(studentSearch.length === 0) {
+    $(".student-list li").css('display', 'none');
+    $(".student-search input").val("");
+    noResults.show();
+  }
+
+  if(inputSearch === '') {
+    $('.student-item').hide().slice(0, 10).show();
+    noResults.hide();
+  }
+})
