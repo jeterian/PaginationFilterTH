@@ -44,3 +44,55 @@ $(".pagination li").on('click', function () {
   numOfStu.hide().slice($(this).index() * 10, $(this).index() * 10 + 10).show();
   noResults.hide();
 })
+
+
+// SEARCH
+
+  //adds input box/button
+function createSearch() {
+    var searchdiv = $("<div></div>").addClass("student-search");
+    $("h2").after(searchdiv);
+    var searchInput = $("<input></input>").attr("placeholder","Search").addClass("searchBox");
+    $(".student-search").append(searchInput);
+    var button = $("<button></button>").text("Search");
+    $(".student-search").append(button);
+}
+
+//calls
+createSearch();
+
+// adds attribute to compare search result with list
+$('.student-details h3').each(function(){
+$(this).parent().parent().attr('searchTerm', $(this).text().toLowerCase());
+});
+
+// event listener triggers search
+$("button").on("click", function(){
+    // Takes input on click
+    var enteredInput = $("input[class=searchBox]").val().toLowerCase();
+    $(".student-list li").removeClass("search-result");
+    numOfStu.hide();
+    $(".pagination li").hide();
+    $(".no-result").remove();
+
+    //Search filter comparing the search against student names
+    $('.student-item').each(function(){
+        if ($(this).filter('[searchTerm *= ' + enteredInput + ']').length > 0 || enteredInput.length === 0) {
+            $(this).addClass("search-result");
+        } else {
+            $(this).removeClass("search-result");
+        }
+    });
+
+// store results of search
+var searchResults = $(".search-result");
+
+// Displays search results or the no results message
+    if (searchResults.length === 0) {
+        noResults.show();
+        $(".page").append(emptyResult);
+    } else {
+        searchResults.show();
+        noResults.hide();
+    }
+});
